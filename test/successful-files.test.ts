@@ -1,3 +1,4 @@
+import fs from 'fs';
 import {
   afterAll,
   afterEach,
@@ -8,7 +9,7 @@ import {
   vi,
 } from 'vitest';
 import { cosmiconfig, cosmiconfigSync } from '../src';
-import { TempDir } from './util';
+import { TempDir, utf16beBuffer } from './util';
 
 const temp = new TempDir();
 
@@ -31,6 +32,54 @@ describe('loads defined JSON config path', () => {
   });
 
   const file = temp.absolutePath('foo.json');
+  const checkResult = (result: any) => {
+    expect(result.config).toEqual({ foo: true });
+    expect(result.filepath).toBe(file);
+  };
+
+  test('async', async () => {
+    const result = await cosmiconfig('successful-files-tests').load(file);
+    checkResult(result);
+  });
+
+  test('sync', () => {
+    const result = cosmiconfigSync('successful-files-tests').load(file);
+    checkResult(result);
+  });
+});
+
+describe('loads UTF-16LE encoded JSON config path (with BOM)', () => {
+  const file = temp.absolutePath('foo-utf16le.json');
+  beforeEach(() => {
+    const bom = Buffer.from([0xff, 0xfe]);
+    const content = Buffer.from('{ "foo": true }\n', 'utf16le');
+    fs.writeFileSync(file, Buffer.concat([bom, content]));
+  });
+
+  const checkResult = (result: any) => {
+    expect(result.config).toEqual({ foo: true });
+    expect(result.filepath).toBe(file);
+  };
+
+  test('async', async () => {
+    const result = await cosmiconfig('successful-files-tests').load(file);
+    checkResult(result);
+  });
+
+  test('sync', () => {
+    const result = cosmiconfigSync('successful-files-tests').load(file);
+    checkResult(result);
+  });
+});
+
+describe('loads UTF-16BE encoded JSON config path (with BOM)', () => {
+  const file = temp.absolutePath('foo-utf16be.json');
+  beforeEach(() => {
+    const bom = Buffer.from([0xfe, 0xff]);
+    const content = utf16beBuffer('{ "foo": true }\n');
+    fs.writeFileSync(file, Buffer.concat([bom, content]));
+  });
+
   const checkResult = (result: any) => {
     expect(result.config).toEqual({ foo: true });
     expect(result.filepath).toBe(file);
