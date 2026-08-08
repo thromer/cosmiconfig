@@ -13,6 +13,7 @@ import {
   decodeFileContent,
   emplace,
   getPropertyByPath,
+  getSearchCacheKey,
   isDirectorySync,
 } from './util.js';
 
@@ -85,7 +86,11 @@ export class ExplorerSync extends ExplorerBase<InternalOptionsSync> {
       if (!nextDirIter.done) {
         currentDir = nextDirIter.value;
         if (this.searchCache) {
-          return emplace(this.searchCache, currentDir.path, search);
+          return emplace(
+            this.searchCache,
+            getSearchCacheKey(currentDir),
+            search,
+          );
         }
         return search();
       }
