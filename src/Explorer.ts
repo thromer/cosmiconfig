@@ -100,7 +100,7 @@ export class Explorer extends ExplorerBase<InternalOptions> {
     };
 
     if (this.searchCache) {
-      return await emplace(this.searchCache, from, search);
+      return await emplace(this.searchCache, getSearchCacheKey(from), search);
     }
     return await search();
   }

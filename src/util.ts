@@ -16,13 +16,15 @@ export function emplace<K, V>(map: Map<K, V>, key: K, fn: () => V): V {
 
 // Computes the key under which a directory's search result is cached. The
 // global config dir can coincide with a plain directory visited earlier in
-// the same search (e.g. when the search starts inside it), so the flag must
-// be part of the key or the two visits' cached results would collide.
+// the same search (e.g. when the search starts inside it), so add a prefix
+// to the key to prevent collisions.
 /**
  * @internal
  */
-export function getSearchCacheKey(dir: DirToSearch): string {
-  return dir.isGlobalConfig ? `global:${dir.path}` : dir.path;
+export function getSearchCacheKey(dir: string | DirToSearch): string {
+  const { path, isGlobalConfig } =
+    typeof dir === 'string' ? { path: dir, isGlobalConfig: false } : dir;
+  return `${isGlobalConfig ? 'global' : 'nonglobal'}:${path}`;
 }
 
 // Resolves property names or property paths defined with period-delimited

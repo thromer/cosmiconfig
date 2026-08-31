@@ -98,7 +98,7 @@ export class ExplorerSync extends ExplorerBase<InternalOptionsSync> {
     };
 
     if (this.searchCache) {
-      return emplace(this.searchCache, from, search);
+      return emplace(this.searchCache, getSearchCacheKey(from), search);
     }
     return search();
   }
